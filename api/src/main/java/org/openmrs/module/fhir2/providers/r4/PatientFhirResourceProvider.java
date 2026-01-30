@@ -103,7 +103,13 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		patient.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), patient));
+		try {
+			return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), patient));
+		}
+		catch (ResourceNotFoundException e) {
+			patient.setId(id.getIdPart());
+			return FhirProviderUtils.buildCreate(patientService.create(patient));
+		}
 	}
 	
 	@Patch
