@@ -168,8 +168,27 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		notNull(currentPatient, "The existing Openmrs Patient object should not be null");
 		notNull(patient, "The Patient object should not be null");
 		
-		if (patient.hasId()) {
-			currentPatient.setUuid(patient.getIdElement().getIdPart());
+		if (patient.hasId() && patient.getIdElement() != null) {
+			String guid = patient.getIdElement().getIdPart();
+			if (guid != null && !guid.trim().isEmpty()) {
+				String trimmedGuid = guid.trim();
+				// Case 1: new Patient with no UUID set at all
+				if (currentPatient.getUuid() == null) {
+					log.info(
+					    "Patient creation via upsert is leveraged: setting UUID on new patient to client-supplied value {}",
+					    trimmedGuid);
+					currentPatient.setUuid(trimmedGuid);
+				}
+				// Case 2: Patient has a generated UUID but is still unpersisted
+				
+				else if (currentPatient.getId() == null && !trimmedGuid.equals(currentPatient.getUuid())) {
+					log.info(
+					    "Patient creation via upsert is leveraged: overriding generated UUID with client-supplied value {}",
+					    trimmedGuid);
+					currentPatient.setUuid(trimmedGuid);
+				}
+				
+			}
 		}
 		
 		for (Identifier identifier : patient.getIdentifier()) {
