@@ -13,6 +13,7 @@ jobs:
     with:
       java_versions: '["8"]'
       main_java_version: '8'
+      deploy_snapshots: false  # Disabled for Nidan fork - Maven deploy only for upstream
     secrets:
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
