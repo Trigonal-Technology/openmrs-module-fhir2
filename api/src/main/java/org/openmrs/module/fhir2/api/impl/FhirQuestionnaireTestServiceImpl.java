@@ -26,8 +26,7 @@ import org.springframework.stereotype.Component;
  * coded test definitions.
  */
 @Component
-public class FhirQuestionnaireTestServiceImpl extends BaseFhirService<Questionnaire, Concept>
-        implements FhirQuestionnaireTestService {
+public class FhirQuestionnaireTestServiceImpl extends BaseFhirService<Questionnaire, Concept> implements FhirQuestionnaireTestService {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)

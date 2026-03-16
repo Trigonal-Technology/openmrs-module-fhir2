@@ -26,8 +26,7 @@ import org.springframework.stereotype.Component;
  * {@link Concept} test definitions.
  */
 @Component
-public class FhirObservationDefinitionServiceImpl extends BaseFhirService<ObservationDefinition, Concept>
-        implements FhirObservationDefinitionService {
+public class FhirObservationDefinitionServiceImpl extends BaseFhirService<ObservationDefinition, Concept> implements FhirObservationDefinitionService {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)

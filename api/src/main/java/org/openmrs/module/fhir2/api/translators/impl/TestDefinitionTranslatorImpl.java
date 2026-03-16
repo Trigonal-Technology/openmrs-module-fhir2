@@ -302,9 +302,8 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 					}
 					
 					ConceptMapType mapType = mapping.getConceptMapType();
-					boolean sameAs = mapType != null
-					        && (ConceptMapType.SAME_AS_MAP_TYPE_UUID.equals(mapType.getUuid())
-					                        || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS")));
+					boolean sameAs = mapType != null && (ConceptMapType.SAME_AS_MAP_TYPE_UUID.equals(mapType.getUuid())
+					        || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS")));
 					if (!sameAs) {
 						continue;
 					}
