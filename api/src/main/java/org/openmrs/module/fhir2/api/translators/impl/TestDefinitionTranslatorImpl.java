@@ -107,6 +107,10 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 			defn.addPermittedDataType(ObservationDataType.CODEABLECONCEPT);
 		}
 		
+		if (concept.getDatatype() != null && "Boolean".equalsIgnoreCase(concept.getDatatype().getName())) {
+			defn.addPermittedDataType(ObservationDataType.BOOLEAN);
+		}
+		
 		if (concept instanceof ConceptNumeric) {
 			populateNumericDefinition((ConceptNumeric) concept, defn);
 			populateNumericIntervals((ConceptNumeric) concept, defn);
@@ -164,6 +168,13 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 				        "Concept datatype 'Numeric' not found; cannot create numeric test definition concept");
 			}
 			datatype = numericDatatype;
+		} else if (isBooleanDefinition(definition)) {
+			ConceptDatatype booleanDatatype = conceptService.getConceptDatatypeByName("Boolean");
+			if (booleanDatatype == null) {
+				throw new IllegalStateException(
+				        "Concept datatype 'Boolean' not found; cannot create boolean test definition concept");
+			}
+			datatype = booleanDatatype;
 		} else if (isCodedDefinition(definition)) {
 			ConceptDatatype codedDatatype = conceptService.getConceptDatatypeByName("Coded");
 			if (codedDatatype == null) {
@@ -407,6 +418,11 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 			if (!(candidate instanceof ConceptNumeric)) {
 				return null;
 			}
+		} else if (isBooleanDefinition(definition)) {
+			ConceptDatatype booleanDatatype = conceptService.getConceptDatatypeByName("Boolean");
+			if (booleanDatatype == null || !booleanDatatype.equals(candidate.getDatatype())) {
+				return null;
+			}
 		} else if (isCodedDefinition(definition)) {
 			ConceptDatatype codedDatatype = conceptService.getConceptDatatypeByName("Coded");
 			if (codedDatatype == null || !codedDatatype.equals(candidate.getDatatype())) {
@@ -443,6 +459,14 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 		}
 		return definition.getPermittedDataType().stream()
 		        .anyMatch(type -> type != null && type.getValue() == ObservationDataType.CODEABLECONCEPT);
+	}
+	
+	private boolean isBooleanDefinition(ObservationDefinition definition) {
+		if (definition == null || !definition.hasPermittedDataType()) {
+			return false;
+		}
+		return definition.getPermittedDataType().stream()
+		        .anyMatch(type -> type != null && type.getValue() == ObservationDataType.BOOLEAN);
 	}
 	
 	private void applyNumericDetails(ConceptNumeric conceptNumeric, ObservationDefinition definition) {

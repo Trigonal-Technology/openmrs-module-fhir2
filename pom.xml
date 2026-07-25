@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>3.1.0-nidan-SNAPSHOT</version>
+    <version>4.3.0-nidan-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -38,13 +38,8 @@
     <modules>
         <module>test-data</module>
         <module>api</module>
-        <module>api-2.5</module>
-        <module>api-2.6</module>
-        <module>api-2.7</module>
         <module>omod</module>
         <module>integration-tests</module>
-        <module>integration-tests-2.6</module>
-        <module>integration-tests-2.7</module>
         <module>e2e-tests</module>
     </modules>
 
@@ -63,6 +58,8 @@
             <url>https://mavenrepo.openmrs.org/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
+                <!-- Prefer local .m2 for nidan SNAPSHOTs; avoid remote lookup until Maven account is set up -->
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
         <repository>
@@ -86,6 +83,7 @@
             <url>https://mavenrepo.openmrs.org/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </pluginRepository>
         <pluginRepository>
@@ -152,12 +150,6 @@
                 <version>${openmrsPlatformVersion}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.javassist</groupId>
-                        <artifactId>javassist</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.openmrs.web</groupId>
@@ -390,7 +382,17 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>31.0.1-jre</version>
+                <version>33.4.8-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.13.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>3.6.0</version>
             </dependency>
             <!-- Support for patches -->
             <dependency>
@@ -403,11 +405,6 @@
                         <artifactId>jackson-databind</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.github.dnault</groupId>
-                <artifactId>xml-patch</artifactId>
-                <version>0.3.1</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
             <dependency>
@@ -431,15 +428,11 @@
             <dependency>
                 <groupId>org.thymeleaf</groupId>
                 <artifactId>thymeleaf</artifactId>
-                <version>3.0.11.RELEASE</version>
+                <version>3.1.3.RELEASE</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.javassist</groupId>
-                        <artifactId>javassist</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -456,18 +449,6 @@
             </dependency>
             <!-- https://mvnrepository.com/artifact/junit/junit -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.1</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>3.2.4</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-core</artifactId>
                 <version>2.2</version>
@@ -477,18 +458,6 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-library</artifactId>
                 <version>2.2</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>2.0.4</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>2.0.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -509,6 +478,12 @@
                 <version>1.1.1</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>1.18.5</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -526,10 +501,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
         </dependency>
@@ -544,18 +515,6 @@
         <dependency>
             <groupId>co.unruly</groupId>
             <artifactId>java-8-matchers</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
         </dependency>
         <dependency>
             <groupId>pl.pragmatists</groupId>
@@ -725,7 +684,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.1.1</version>
                     <configuration>
-                        <goals>install</goals>
+                        <goals>deploy</goals>
                         <useReleaseProfile>false</useReleaseProfile>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <tagNameFormat>@{project.version}</tagNameFormat>
@@ -898,7 +857,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.8</version>
+                    <version>0.8.12</version>
                     <executions>
                         <execution>
                             <goals>
@@ -924,8 +883,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
         <lombokVersion>1.18.38</lombokVersion>
-        <openmrsPlatformVersion>2.4.1</openmrsPlatformVersion>
-        <openmrsPlatformToolsVersion>2.4.1</openmrsPlatformToolsVersion>
+        <openmrsPlatformVersion>2.8.0</openmrsPlatformVersion>
+        <openmrsPlatformToolsVersion>2.8.0</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.7.9</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
     </properties>
@@ -982,6 +941,21 @@
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>java11plus-spotless</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <version>2.43.0</version>
                     </plugin>
                 </plugins>
             </build>

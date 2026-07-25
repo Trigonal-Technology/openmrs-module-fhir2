@@ -1,4 +1,4 @@
-name: Build
+name: Build with Maven
 
 on:
   push:
@@ -11,10 +11,14 @@ jobs:
   build:
     uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
     with:
-      java_versions: '["8"]'
-      main_java_version: '8'
       deploy_snapshots: false  # Disabled for Nidan fork - Maven deploy only for upstream
     secrets:
-      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
       MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
+
+  owasp-dependency-check:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/owasp-dependency-check.yml@main
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      BOT_GH_TOKEN: ${{ secrets.OMRS_BOT_GH_TOKEN }}
