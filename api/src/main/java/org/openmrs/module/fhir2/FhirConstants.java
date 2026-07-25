@@ -299,6 +299,8 @@ public final class FhirConstants {
 	
 	public static final String FOR_REFERENCE_SEARCH_HANDLER = "for.reference.search.handler";
 	
+	public static final String FOCUS_REFERENCE_SEARCH_HANDLER = "focus.reference.search.handler";
+	
 	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
@@ -350,8 +352,6 @@ public final class FhirConstants {
 	public static final String INCLUDE_BASED_0N_PARAM = "based-on";
 	
 	public static final String INCLUDE_OWNER_PARAM = "owner";
-	
-	public static final String INCLUDE_PRESCRIPTION_PARAMETER = "prescription";
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	

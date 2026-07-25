@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -57,6 +58,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
+	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
 	private static final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	
 	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_json_patch.json";
@@ -88,7 +91,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -107,7 +110,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -121,7 +124,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -140,7 +143,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -161,7 +164,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -244,7 +247,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -281,7 +284,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -361,7 +364,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -413,7 +416,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + TASK_UUID).jsonContent(toJson(task)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task updatedTask = readResponse(response);
@@ -448,7 +451,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + TASK_UUID).jsonContent(toJson(task)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -470,7 +473,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -499,7 +502,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task updatedTask = readResponse(response);
@@ -533,7 +536,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -555,7 +558,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		response = put("/Task/" + WRONG_TASK_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -576,7 +579,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -599,7 +602,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -622,7 +625,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
@@ -649,7 +652,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = delete("/Patient/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -663,7 +666,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -684,7 +687,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task?status=requested&_sort=_lastUpdated").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -714,7 +717,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -735,7 +738,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task?status=requested&_sort=_lastUpdated").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -765,7 +768,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -780,7 +783,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -791,11 +794,72 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	}
 	
 	@Test
+	public void shouldCreateTaskWithFocusReferenceAndRetrieveItAsJson() throws Exception {
+		//given — build a FHIR Task with focus set to an Observation reference
+		Task newTask = new Task();
+		newTask.setStatus(Task.TaskStatus.REQUESTED);
+		newTask.setIntent(Task.TaskIntent.ORDER);
+		
+		Reference focusRef = new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation");
+		newTask.setFocus(focusRef);
+		
+		//when — POST the task
+		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
+		
+		assertThat(createResponse, isCreated());
+		
+		Task createdTask = readResponse(createResponse);
+		String createdTaskUuid = createdTask.getIdElement().getIdPart();
+		
+		//then — GET it back and verify focus is persisted
+		MockHttpServletResponse getResponse = get("/Task/" + createdTaskUuid).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(getResponse, isOk());
+		
+		Task retrievedTask = readResponse(getResponse);
+		
+		assertThat(retrievedTask, notNullValue());
+		assertThat(retrievedTask.hasFocus(), is(true));
+		assertThat(retrievedTask.getFocus().getReference(), equalTo("Observation/" + FOCUS_OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void shouldSearchTasksByFocusReferenceAsJson() throws Exception {
+		//given — create a task with focus via the API
+		Task newTask = new Task();
+		newTask.setStatus(Task.TaskStatus.REQUESTED);
+		newTask.setIntent(Task.TaskIntent.ORDER);
+		newTask.setFocus(new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation"));
+		
+		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
+		assertThat(createResponse, isCreated());
+		Task createdTask = readResponse(createResponse);
+		
+		//when
+		MockHttpServletResponse response = get("/Task?focus=Observation/" + FOCUS_OBSERVATION_UUID)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		//then
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry(), hasSize(1));
+		assertThat(results.getEntry(), hasItem(
+		    hasResource(hasProperty("idElement", hasProperty("idPart", equalTo(createdTask.getIdElement().getIdPart()))))));
+	}
+	
+	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingTask() throws Exception {
 		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -814,7 +878,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		

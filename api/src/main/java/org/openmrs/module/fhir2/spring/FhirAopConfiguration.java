@@ -12,12 +12,15 @@ package org.openmrs.module.fhir2.spring;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.aop.AuthorizationAdvice;
 import org.openmrs.module.fhir2.api.FhirHelperService;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDaoAop;
 import org.openmrs.module.fhir2.api.translators.FhirTranslator;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -44,13 +47,42 @@ public class FhirAopConfiguration {
 	
 	@Bean
 	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
-		return new StaticMethodMatcherPointcutAdvisor(authorizationAdvice) {
+		MethodBeforeAdvice advice = (method, args, target) -> {
+			// The core AuthorizationAdvice only resolves privileges from an @Authorized annotation that is
+			// directly declared on the method it is handed. When a DAO implementation overrides an interface
+			// method (e.g. getSearchResults()), the method invoked on the proxy carries the annotation only
+			// by inheritance, so we must substitute the interface method that declares it directly. We key
+			// off getAnnotation() rather than AnnotationUtils.findAnnotation() precisely because the latter
+			// resolves inherited annotations and would mask these overridden methods.
+			if (method.getAnnotation(Authorized.class) == null) {
+				Method resolved = findAuthorizedInterfaceMethod(method, target.getClass());
+				if (resolved != null) {
+					method = resolved;
+				}
+			}
+			authorizationAdvice.before(method, args, target);
+		};
+		
+		return new StaticMethodMatcherPointcutAdvisor(advice) {
 			
 			@Override
 			public boolean matches(Method method, Class<?> targetClass) {
 				return FhirDaoAop.class.isAssignableFrom(targetClass);
 			}
 		};
+	}
+	
+	private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
+		for (Class<?> iface : ClassUtils.getAllInterfaces(targetClass)) {
+			try {
+				Method ifaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+				if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
+					return ifaceMethod;
+				}
+			}
+			catch (NoSuchMethodException e) {}
+		}
+		return null;
 	}
 	
 	@Bean
@@ -70,7 +102,7 @@ public class FhirAopConfiguration {
 	
 	/**
 	 * Creates advisors for FHIR beans using Spring caching. It is required before OpenMRS core 2.8.
-	 * 
+	 *
 	 * @param cacheInterceptor the cache interceptor
 	 * @return the cache advisor
 	 */
