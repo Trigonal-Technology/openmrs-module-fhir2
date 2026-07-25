@@ -63,6 +63,8 @@
             <url>https://mavenrepo.openmrs.org/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
+                <!-- Prefer local .m2 for nidan SNAPSHOTs; avoid remote lookup until Maven account is set up -->
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
         <repository>
@@ -86,6 +88,7 @@
             <url>https://mavenrepo.openmrs.org/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
             </snapshots>
         </pluginRepository>
         <pluginRepository>
