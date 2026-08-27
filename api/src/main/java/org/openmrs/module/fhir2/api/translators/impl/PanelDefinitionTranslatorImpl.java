@@ -62,6 +62,20 @@ public class PanelDefinitionTranslatorImpl implements PanelDefinitionTranslator 
 			}
 		}
 		
+		return toOpenmrsType(panel, resource);
+	}
+	
+	@Override
+	public Concept toOpenmrsType(@Nonnull Concept panel, @Nonnull ListResource resource) {
+		if (panel == null || resource == null) {
+			return panel;
+		}
+		
+		String id = resource.getIdElement() != null ? resource.getIdElement().getIdPart() : null;
+		if (id != null && !id.trim().isEmpty() && panel.getUuid() == null) {
+			panel.setUuid(id.trim());
+		}
+		
 		panel.setSet(true);
 		
 		ConceptClass labSetClass = conceptService.getConceptClassByUuid(ConceptClass.LABSET_UUID);
@@ -87,6 +101,20 @@ public class PanelDefinitionTranslatorImpl implements PanelDefinitionTranslator 
 			title = idElement != null ? idElement.getIdPart() : null;
 		}
 		applyOrUpdatePanelName(panel, title);
+		
+		// Map FHIR List status → OpenMRS concept retired flag.
+		// Only act when the sender explicitly provides a status value; a null/unknown
+		// status is treated as "don't change" so old senders that omit the field are
+		// fully safe and existing retired state is preserved.
+		ListResource.ListStatus incomingStatus = resource.getStatus();
+		log.info("DEBUG NIDAN PanelDefinitionTranslatorImpl.toOpenmrsType: uuid={} incomingStatus={}", panel.getUuid(),
+		    incomingStatus);
+		if (incomingStatus == ListResource.ListStatus.RETIRED) {
+			panel.setRetired(true);
+		} else if (incomingStatus == ListResource.ListStatus.CURRENT) {
+			panel.setRetired(false);
+		}
+		// ListStatus.ENTEREDINERROR or null → no-op; caller may handle separately
 		
 		Set<String> desiredMemberUuids = new HashSet<>();
 		if (resource.hasEntry()) {
@@ -214,10 +242,14 @@ public class PanelDefinitionTranslatorImpl implements PanelDefinitionTranslator 
 			return null;
 		}
 		
+		// debug: Nidan panel toFhirResource
+		log.info("DEBUG NIDAN PanelDefinitionTranslatorImpl.toFhirResource: uuid={} retired={}", concept.getUuid(),
+		    concept.getRetired());
 		ListResource list = new ListResource();
 		list.setId(concept.getUuid());
 		list.setTitle(concept.getName() != null ? concept.getName().getName() : "");
-		list.setStatus(ListResource.ListStatus.CURRENT);
+		list.setStatus(
+		    Boolean.TRUE.equals(concept.getRetired()) ? ListResource.ListStatus.RETIRED : ListResource.ListStatus.CURRENT);
 		
 		List<Concept> members = concept.getSetMembers();
 		if (members != null) {
