@@ -18,9 +18,11 @@ import java.util.Locale;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ObservationDefinition;
 import org.hl7.fhir.r4.model.ObservationDefinition.ObservationDataType;
 import org.hl7.fhir.r4.model.ObservationDefinition.ObservationDefinitionQualifiedIntervalComponent;
@@ -114,6 +116,11 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 		if (concept instanceof ConceptNumeric) {
 			populateNumericDefinition((ConceptNumeric) concept, defn);
 			populateNumericIntervals((ConceptNumeric) concept, defn);
+		}
+		
+		if (concept.getRetired() != null) {
+			defn.addExtension("http://fhir.openmrs.org/ext/concept/retired",
+			    new BooleanType(Boolean.TRUE.equals(concept.getRetired())));
 		}
 		
 		return defn;
@@ -225,6 +232,26 @@ public class TestDefinitionTranslatorImpl implements TestDefinitionTranslator {
 			            ? definition.getValidCodedValueSet().getReference()
 			            : null);
 			applyAnswersFromValidCodedValueSet(existing, definition);
+		}
+		
+		// Map FHIR extension -> OpenMRS concept retired flag.
+		// Supports boolean extension "http://fhir.openmrs.org/ext/concept/retired"
+		// or status extension "http://fhir.openmrs.org/ext/concept/status"
+		if (definition.hasExtension()) {
+			Extension retiredExt = definition.getExtensionByUrl("http://fhir.openmrs.org/ext/concept/retired");
+			if (retiredExt != null && retiredExt.getValue() instanceof BooleanType) {
+				existing.setRetired(((BooleanType) retiredExt.getValue()).booleanValue());
+			} else {
+				Extension statusExt = definition.getExtensionByUrl("http://fhir.openmrs.org/ext/concept/status");
+				if (statusExt != null && statusExt.getValue() != null) {
+					String val = statusExt.getValue().primitiveValue();
+					if ("retired".equalsIgnoreCase(val) || "inactive".equalsIgnoreCase(val)) {
+						existing.setRetired(true);
+					} else if ("current".equalsIgnoreCase(val) || "active".equalsIgnoreCase(val)) {
+						existing.setRetired(false);
+					}
+				}
+			}
 		}
 		
 		return existing;

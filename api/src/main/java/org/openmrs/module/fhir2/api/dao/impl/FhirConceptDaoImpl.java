@@ -24,12 +24,15 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptSource;
+import org.openmrs.aop.RequiredDataAdvice;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.handler.UnretireHandler;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -37,12 +40,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
 	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PUBLIC, onMethod = @__({ @Autowired, @VisibleForTesting }))
 	private ConceptService conceptService;
+	
+	/**
+	 * Overrides the base Hibernate saveOrUpdate with OpenMRS service-layer calls so that the
+	 * retire/unretire lifecycle (retiredBy, dateRetired, retireReason) is handled correctly. A plain
+	 * Hibernate saveOrUpdate skips that audit trail.
+	 */
+	@Override
+	@Transactional
+	public Concept createOrUpdate(@Nonnull Concept concept) {
+		boolean wantsRetired = Boolean.TRUE.equals(concept.getRetired());
+		boolean isFormallyRetired = concept.getDateRetired() != null;
+		
+		log.info("DEBUG NIDAN FhirConceptDaoImpl.createOrUpdate: uuid={} wantsRetired={} isFormallyRetired={}",
+		    concept.getUuid(), wantsRetired, isFormallyRetired);
+		
+		if (wantsRetired && !isFormallyRetired) {
+			concept.setRetired(false);
+			Concept saved = conceptService.saveConcept(concept);
+			Concept retired = conceptService.retireConcept(saved, "Inactive in source system");
+			log.info("DEBUG NIDAN FhirConceptDaoImpl.createOrUpdate: retired concept uuid={} retiredFlag={}",
+			    retired.getUuid(), retired.getRetired());
+			return retired;
+		} else if (!wantsRetired && isFormallyRetired) {
+			RequiredDataAdvice.recursivelyHandle(UnretireHandler.class, concept, null);
+			Concept saved = conceptService.saveConcept(concept);
+			log.info("DEBUG NIDAN FhirConceptDaoImpl.createOrUpdate: unretired concept uuid={} retiredFlag={}",
+			    saved.getUuid(), saved.getRetired());
+			return saved;
+		} else {
+			return conceptService.saveConcept(concept);
+		}
+	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -53,6 +89,8 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	@Override
 	@Transactional(readOnly = true)
 	public Concept get(@Nonnull String uuid) {
+		// getConceptByUuid returns retired concepts too — needed so updates to
+		// inactive panels don't accidentally create duplicate concepts.
 		return conceptService.getConceptByUuid(uuid);
 	}
 	

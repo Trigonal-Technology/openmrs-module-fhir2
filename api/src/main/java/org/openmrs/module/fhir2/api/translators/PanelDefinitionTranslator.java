@@ -17,4 +17,4 @@ import org.openmrs.Concept;
  * with set=true and ConceptSets as members) and FHIR R4 {@link ListResource} instances whose
  * entries reference ObservationDefinition resources for individual tests.
  */
-public interface PanelDefinitionTranslator extends OpenmrsFhirTranslator<Concept, ListResource> {}
+public interface PanelDefinitionTranslator extends OpenmrsFhirUpdatableTranslator<Concept, ListResource> {}
